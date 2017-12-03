@@ -292,6 +292,39 @@ namespace Emby.Naming.Tests.AudioBook
             Assert.AreEqual("Tides of Darkness", result[0].Name);
         }
 
+        [TestMethod]
+        // Test case provided by Luke, with mixed files in same folder
+        public void TestListResolver10()
+        {
+            var files = new[]
+            {
+                @"\\audiobooks\book\01 Come Together.m4a", // Book 1
+                @"\\audiobooks\book\01 Radioactive.m4a",   // Book 1
+                @"\\audiobooks\book\1-03 Pictures Of You (Live Detroit Version).mp3", // Book 2
+                @"\\audiobooks\book\02 Tiptoe.m4a",        // Book 1
+                @"\\audiobooks\book\08 Mother.wma",        // Book 3
+                @"\\audiobooks\book\24bit flac.flac",      // Book 4
+                @"\\audiobooks\book\Bad Voltage 2x19.ogg", // Book 5
+                @"\\audiobooks\book\mp2 test file.mp2",    // Book 6
+                @"\\audiobooks\book\Telegraph Road.ogg",   // Book 7
+            };
+            var resolver = GetResolver();
+            var result = resolver.Resolve(files.Select(i => new FileSystemMetadata
+            {
+                IsDirectory = false,
+                FullName = i
+
+            }).ToList()).ToList();
+
+            Assert.AreEqual(7, result.Count);
+            Assert.AreEqual(3, result[0].Files.Count);
+            Assert.AreEqual(null, result[0].Files[0].PartNumber);
+            Assert.AreEqual(1, result[0].Files[0].ChapterNumber);
+            Assert.AreEqual(19, result[4].Files[0].PartNumber);
+            Assert.AreEqual(2, result[4].Files[0].ChapterNumber);
+            Assert.AreEqual("book", result[0].Name);
+        }
+
         private AudioBookListResolver GetResolver()
         {
             var options = new ExtendedNamingOptions();

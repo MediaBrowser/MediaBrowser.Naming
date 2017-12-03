@@ -503,14 +503,14 @@ namespace Emby.Naming.Common
                 @"ch(?:apter)?[\s_-]?(?<chapter>\d+)",
                 // Detect specified parts, like Part 02
                 @"p(?:ar)?t[\s_-]?(?<part>\d+)",
-                // Chapter is often beginning of filename
-                @"^(?<chapter>\d+)",
-                // Part if often ending of filename
-                @"(?<part>\d+)$",
                 // Sometimes named as 0001_005 (chapter_part)
                 @"(?<chapter>\d+)_(?<part>\d+)",
+                @"(?<chapter>\d+)\-(?<part>\d+)",
+                @"(?<chapter>\d+)x(?<part>\d+)",
                 // Some audiobooks are ripped from cd's, and will be named by disk number.
-                @"dis(?:c|k)[\s_-]?(?<chapter>\d+)"
+                @"dis(?:c|k)[\s_-]?(?<chapter>\d+)",
+                // Chapter is often beginning of filename. Part if often ending of filename
+                @"^(?<chapter>\d+)?.+?(?<part>\d+)?$"
             };
 
         }

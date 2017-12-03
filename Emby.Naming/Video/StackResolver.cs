@@ -47,16 +47,33 @@ namespace Emby.Naming.Video
             var result = new StackResult();
             foreach (var directory in files.GroupBy(file => file.IsDirectory ? file.FullName : Path.GetDirectoryName(file.FullName)))
             {
-                var stack = new FileStack();
-                stack.Name = Path.GetFileName(directory.Key);
-                stack.IsDirectoryStack = false;
-                foreach (var file in directory)
+                foreach (var extGroup in directory.GroupBy(f => Path.GetExtension(f.FullName)?.ToLower()))
                 {
-                    if (file.IsDirectory)
-                        continue;
-                    stack.Files.Add(file.FullName);
+                    var matchedFiles = new List<string>();
+                    foreach (var expression in _options.AudioBookPartsExpressions)
+                    {
+                        var regex = _iRegexProvider.GetRegex(expression, RegexOptions.IgnoreCase);
+                        var stack = new FileStack
+                        {
+                            Expression = expression,
+                            IsDirectoryStack = false,
+                            Name = Path.GetFileName(directory.Key)
+                        };
+                        foreach (var file in extGroup)
+                        {
+                            if (file.IsDirectory || matchedFiles.Contains(file.FullName))
+                                continue;
+                            var match = regex.Match(Path.GetFileNameWithoutExtension(file.FullName));
+                            if (match.Success)
+                            {
+                                stack.Files.Add(file.FullName);
+                                matchedFiles.Add(file.FullName);
+                            }
+                        }
+                        if (stack.Files.Any())
+                            result.Stacks.Add(stack);
+                    }
                 }
-                result.Stacks.Add(stack);
             }
             return result;
         }
